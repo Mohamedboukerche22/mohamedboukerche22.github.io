@@ -1,0 +1,804 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mohamed Boukerche | Portfolio</title>
+  <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Fira+Code:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --green: #00ff41;
+      --green-dim: #00cc33;
+      --green-faint: rgba(0,255,65,0.07);
+      --green-glow: rgba(0,255,65,0.25);
+      --bg: #0a0a0a;
+      --bg2: #0f0f0f;
+      --card: #111411;
+      --border: rgba(0,255,65,0.18);
+      --text: #c8ffc8;
+      --muted: #4a7a4a;
+      --font-mono: 'Fira Code', 'Share Tech Mono', monospace;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font-mono);
+      font-size: 14px;
+      line-height: 1.7;
+      overflow-x: hidden;
+    }
+
+    /* Scanline overlay */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background: repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 2px,
+        rgba(0,0,0,0.07) 2px,
+        rgba(0,0,0,0.07) 4px
+      );
+      pointer-events: none;
+      z-index: 9999;
+    }
+
+    /* Matrix canvas */
+    #matrix-bg {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      z-index: 0;
+      opacity: 0.045;
+    }
+
+    /* ── NAV ── */
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      background: rgba(10,10,10,0.92);
+      border-bottom: 1px solid var(--border);
+      backdrop-filter: blur(8px);
+      padding: 0 2rem;
+      height: 52px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .nav-logo {
+      color: var(--green);
+      font-size: 15px;
+      font-weight: 600;
+      letter-spacing: 2px;
+      text-decoration: none;
+    }
+
+    .nav-logo span { color: var(--muted); }
+
+    .nav-links {
+      display: flex;
+      gap: 1.8rem;
+      list-style: none;
+    }
+
+    .nav-links a {
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 12px;
+      letter-spacing: 1px;
+      transition: color 0.2s;
+    }
+
+    .nav-links a:hover { color: var(--green); }
+
+    /* ── LAYOUT ── */
+    main { position: relative; z-index: 1; }
+
+    section {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 5rem 1.5rem 3rem;
+    }
+
+    .section-label {
+      color: var(--muted);
+      font-size: 11px;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      margin-bottom: 0.4rem;
+    }
+
+    .section-title {
+      color: var(--green);
+      font-size: 22px;
+      font-weight: 600;
+      margin-bottom: 2.5rem;
+    }
+
+    /* ── HERO ── */
+    #hero {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding-top: 6rem;
+    }
+
+    .hero-prompt {
+      color: var(--muted);
+      font-size: 13px;
+      margin-bottom: 0.6rem;
+    }
+
+    .hero-name {
+      font-size: clamp(2rem, 6vw, 3.8rem);
+      font-weight: 600;
+      color: var(--green);
+      text-shadow: 0 0 40px var(--green-glow);
+      line-height: 1.1;
+      margin-bottom: 0.5rem;
+    }
+
+    .hero-title {
+      font-size: clamp(0.9rem, 2vw, 1.2rem);
+      color: var(--text);
+      margin-bottom: 1.6rem;
+      opacity: 0.75;
+    }
+
+    .typing-line {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 13px;
+      color: var(--muted);
+      margin-bottom: 2.5rem;
+    }
+
+    .typing-text {
+      color: var(--green);
+      border-right: 2px solid var(--green);
+      padding-right: 3px;
+      animation: blink 0.9s step-end infinite;
+      white-space: nowrap;
+      overflow: hidden;
+    }
+
+    @keyframes blink { 50% { border-color: transparent; } }
+
+    .hero-btns {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.55rem 1.3rem;
+      border: 1px solid var(--green);
+      color: var(--green);
+      text-decoration: none;
+      font-family: var(--font-mono);
+      font-size: 12px;
+      letter-spacing: 1px;
+      transition: background 0.2s, box-shadow 0.2s, color 0.2s;
+      cursor: pointer;
+      background: transparent;
+    }
+
+    .btn:hover {
+      background: var(--green);
+      color: #000;
+      box-shadow: 0 0 18px var(--green-glow);
+    }
+
+    .btn-ghost {
+      border-color: var(--muted);
+      color: var(--muted);
+    }
+
+    .btn-ghost:hover {
+      border-color: var(--green);
+      background: var(--green-faint);
+      color: var(--green);
+      box-shadow: none;
+    }
+
+    /* Hero badges */
+    .hero-badges {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+      margin-top: 3rem;
+      padding-top: 2rem;
+      border-top: 1px solid var(--border);
+    }
+
+    .badge {
+      font-size: 11px;
+      color: var(--muted);
+      letter-spacing: 1px;
+    }
+
+    .badge span { color: var(--green); margin-right: 4px; }
+
+    /* ── ABOUT ── */
+    .about-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+    }
+
+    .terminal-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      padding: 1.4rem;
+      position: relative;
+    }
+
+    .terminal-card::before {
+      content: '● ● ●';
+      display: block;
+      font-size: 9px;
+      color: var(--muted);
+      letter-spacing: 3px;
+      margin-bottom: 1rem;
+      opacity: 0.5;
+    }
+
+    .about-text {
+      color: var(--text);
+      font-size: 13px;
+      opacity: 0.85;
+      line-height: 1.9;
+    }
+
+    .info-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.5rem;
+      font-size: 12px;
+      margin-bottom: 0.7rem;
+    }
+
+    .info-key { color: var(--muted); min-width: 80px; }
+    .info-val { color: var(--green); }
+
+    /* ── SKILLS ── */
+    .skills-groups {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1.5rem;
+    }
+
+    .skill-group-title {
+      font-size: 10px;
+      letter-spacing: 2px;
+      color: var(--muted);
+      text-transform: uppercase;
+      margin-bottom: 1rem;
+    }
+
+    .skill-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    .skill-tag {
+      font-size: 11px;
+      padding: 0.3rem 0.7rem;
+      border: 1px solid var(--border);
+      color: var(--text);
+      background: var(--green-faint);
+      letter-spacing: 0.5px;
+      transition: border-color 0.2s, color 0.2s;
+    }
+
+    .skill-tag:hover {
+      border-color: var(--green);
+      color: var(--green);
+    }
+
+    /* ── PROJECTS ── */
+    .projects-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 1.2rem;
+    }
+
+    .project-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      padding: 1.4rem;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .project-card::after {
+      content: '';
+      position: absolute;
+      top: 0; left: 0;
+      width: 3px; height: 0;
+      background: var(--green);
+      transition: height 0.3s;
+    }
+
+    .project-card:hover { border-color: var(--green); box-shadow: 0 0 20px var(--green-glow); }
+    .project-card:hover::after { height: 100%; }
+
+    .project-num {
+      font-size: 10px;
+      color: var(--muted);
+      letter-spacing: 2px;
+      margin-bottom: 0.7rem;
+    }
+
+    .project-name {
+      color: var(--green);
+      font-size: 15px;
+      font-weight: 600;
+      margin-bottom: 0.6rem;
+    }
+
+    .project-desc {
+      color: var(--text);
+      font-size: 12px;
+      opacity: 0.75;
+      margin-bottom: 1rem;
+      line-height: 1.7;
+    }
+
+    .project-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+      margin-bottom: 1rem;
+    }
+
+    .project-tag {
+      font-size: 10px;
+      padding: 0.15rem 0.5rem;
+      border: 1px solid var(--muted);
+      color: var(--muted);
+      letter-spacing: 0.5px;
+    }
+
+    .project-links { display: flex; gap: 0.8rem; }
+
+    .project-link {
+      font-size: 11px;
+      color: var(--muted);
+      text-decoration: none;
+      letter-spacing: 1px;
+      transition: color 0.2s;
+    }
+
+    .project-link:hover { color: var(--green); }
+
+    /* ── COMPETITIVE ── */
+    .cp-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.2rem;
+    }
+
+    .cp-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      padding: 1.4rem;
+      text-decoration: none;
+      display: block;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .cp-card:hover {
+      border-color: var(--green);
+      box-shadow: 0 0 16px var(--green-glow);
+    }
+
+    .cp-name { color: var(--green); font-size: 14px; font-weight: 600; margin-bottom: 0.3rem; }
+    .cp-handle { color: var(--muted); font-size: 12px; }
+
+    /* ── CONTACT ── */
+    .contact-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.2rem;
+    }
+
+    .contact-item {
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+      padding: 1rem 1.2rem;
+      background: var(--card);
+      border: 1px solid var(--border);
+      text-decoration: none;
+      transition: border-color 0.2s;
+    }
+
+    .contact-item:hover { border-color: var(--green); }
+
+    .contact-icon { color: var(--green); font-size: 16px; width: 22px; text-align: center; }
+    .contact-label { font-size: 10px; color: var(--muted); letter-spacing: 1px; display: block; }
+    .contact-val { font-size: 12px; color: var(--text); }
+
+    /* ── FOOTER ── */
+    footer {
+      position: relative;
+      z-index: 1;
+      border-top: 1px solid var(--border);
+      padding: 2rem 1.5rem;
+      max-width: 900px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .footer-copy { font-size: 11px; color: var(--muted); }
+    .footer-copy span { color: var(--green); }
+
+    .social-row { display: flex; gap: 1.2rem; }
+
+    .social-row a {
+      font-size: 11px;
+      color: var(--muted);
+      text-decoration: none;
+      letter-spacing: 1px;
+      transition: color 0.2s;
+    }
+
+    .social-row a:hover { color: var(--green); }
+
+    /* ── DIVIDER ── */
+    .divider {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 0;
+    }
+
+    /* ── SCROLL REVEAL ── */
+    .reveal { opacity: 0; transform: translateY(18px); transition: opacity 0.6s ease, transform 0.6s ease; }
+    .reveal.visible { opacity: 1; transform: none; }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 640px) {
+      nav { padding: 0 1rem; }
+      .nav-links { gap: 1rem; }
+      .about-grid, .cp-grid, .contact-grid, .github-stats { grid-template-columns: 1fr; }
+      .hero-name { font-size: 2rem; }
+    }
+  </style>
+</head>
+<body>
+
+<canvas id="matrix-bg"></canvas>
+
+<!-- NAV -->
+<nav>
+  <a href="#hero" class="nav-logo">mb<span>@</span>terminal<span>:~$</span></a>
+  <ul class="nav-links">
+    <li><a href="#about">about</a></li>
+    <li><a href="#skills">skills</a></li>
+    <li><a href="#projects">projects</a></li>
+    <li><a href="#contact">contact</a></li>
+  </ul>
+</nav>
+
+<main>
+
+  <!-- HERO -->
+  <section id="hero">
+    <p class="hero-prompt">visitor@portfolio:~$ ./run_profile.sh</p>
+    <h1 class="hero-name">Mohamed Boukerche</h1>
+    <p class="hero-title">Competitive Programmer · Linux User · Web Developer · AI Enthusiast</p>
+    <div class="typing-line">
+      <span>→</span>
+      <span class="typing-text" id="typing"></span>
+    </div>
+    <div class="hero-btns">
+      <a href="#projects" class="btn">[ view projects ]</a>
+      <a href="#contact" class="btn btn-ghost">[ contact me ]</a>
+      <a href="https://github.com/Mohamedboukerche22" target="_blank" class="btn btn-ghost">[ github ]</a>
+    </div>
+    <div class="hero-badges">
+      <span class="badge"><span>⚡</span>17 y.o.</span>
+      <span class="badge"><span>🇩🇿</span>Algeria</span>
+      <span class="badge"><span>🐧</span>Arch Linux</span>
+      <span class="badge"><span>🔐</span>Kali Linux</span>
+      <span class="badge"><span>🏆</span>Codeforces</span>
+      <span class="badge"><span>⚙️</span>AtCoder</span>
+    </div>
+  </section>
+
+  <hr class="divider" />
+
+  <!-- ABOUT -->
+  <section id="about">
+    <p class="section-label reveal">// whoami</p>
+    <h2 class="section-title reveal">About Me</h2>
+    <div class="about-grid">
+      <div class="terminal-card reveal">
+        <p class="about-text">
+          I'm a 17-year-old full-stack developer and competitive programmer from Algeria.
+          I build everything from terminal editors and custom programming languages to web apps
+          and operating system prototypes. I love low-level systems, AI, and open-source.
+        </p>
+      </div>
+      <div class="terminal-card reveal">
+        <div class="info-row"><span class="info-key">name</span><span class="info-val">Mohamed Boukerche</span></div>
+        <div class="info-row"><span class="info-key">age</span><span class="info-val">17</span></div>
+        <div class="info-row"><span class="info-key">location</span><span class="info-val">Algeria 🇩🇿</span></div>
+        <div class="info-row"><span class="info-key">focus</span><span class="info-val">C++ · Python · AI</span></div>
+        <div class="info-row"><span class="info-key">os</span><span class="info-val">Arch / Kali Linux</span></div>
+        <div class="info-row"><span class="info-key">email</span><span class="info-val">mohamedboukerche55</span></div>
+        <div class="info-row"><span class="info-key">status</span><span class="info-val" style="animation: blink 1s step-end infinite;">▌ available</span></div>
+      </div>
+    </div>
+  </section>
+
+  <hr class="divider" />
+
+  <!-- SKILLS -->
+  <section id="skills">
+    <p class="section-label reveal">// skills --list</p>
+    <h2 class="section-title reveal">Languages & Tools</h2>
+    <div class="skills-groups reveal">
+      <div class="terminal-card">
+        <p class="skill-group-title">Languages</p>
+        <div class="skill-tags">
+          <span class="skill-tag">C++</span>
+          <span class="skill-tag">Python</span>
+          <span class="skill-tag">C</span>
+          <span class="skill-tag">JavaScript</span>
+          <span class="skill-tag">TypeScript</span>
+          <span class="skill-tag">PHP</span>
+        </div>
+      </div>
+      <div class="terminal-card">
+        <p class="skill-group-title">Frameworks & Tools</p>
+        <div class="skill-tags">
+          <span class="skill-tag">React</span>
+          <span class="skill-tag">Node.js</span>
+          <span class="skill-tag">Electron</span>
+          <span class="skill-tag">MySQL</span>
+          <span class="skill-tag">Git</span>
+        </div>
+      </div>
+      <div class="terminal-card">
+        <p class="skill-group-title">Operating Systems</p>
+        <div class="skill-tags">
+          <span class="skill-tag">Linux</span>
+          <span class="skill-tag">Arch Linux</span>
+          <span class="skill-tag">Kali Linux</span>
+          <span class="skill-tag">Ubuntu</span>
+        </div>
+      </div>
+      <div class="terminal-card">
+        <p class="skill-group-title">Design / 3D / Game Dev</p>
+        <div class="skill-tags">
+          <span class="skill-tag">Figma</span>
+          <span class="skill-tag">Blender</span>
+          <span class="skill-tag">Unity</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <hr class="divider" />
+
+  <!-- PROJECTS -->
+  <section id="projects">
+    <p class="section-label reveal">// ls ./projects/</p>
+    <h2 class="section-title reveal">Featured Projects</h2>
+    <div class="projects-grid">
+
+      <div class="project-card reveal">
+        <p class="project-num">01 /</p>
+        <h3 class="project-name">AOI Editor</h3>
+        <p class="project-desc">Lightweight terminal-based code editor for competitive programming with C++ syntax highlighting and quick compilation.</p>
+        <div class="project-tags">
+          <span class="project-tag">C++</span>
+          <span class="project-tag">Terminal</span>
+          <span class="project-tag">Competitive</span>
+        </div>
+        <div class="project-links">
+          <a href="https://github.com/Mohamedboukerche22/AOI-IDE" target="_blank" class="project-link">→ github</a>
+          <a href="https://mohamedboukerche22.github.io/AOI-WEB-IDE/" target="_blank" class="project-link">→ demo</a>
+        </div>
+      </div>
+
+      <div class="project-card reveal">
+        <p class="project-num">02 /</p>
+        <h3 class="project-name">C-moh Language</h3>
+        <p class="project-desc">A custom English-like programming language built from scratch in C++. Write code in natural, readable syntax.</p>
+        <div class="project-tags">
+          <span class="project-tag">C++</span>
+          <span class="project-tag">Language Design</span>
+          <span class="project-tag">Compiler</span>
+        </div>
+        <div class="project-links">
+          <a href="https://github.com/Mohamedboukerche22/c-moh" target="_blank" class="project-link">→ github</a>
+          <a href="https://mohamedboukerche22.github.io/c-moh-web/" target="_blank" class="project-link">→ demo</a>
+        </div>
+      </div>
+
+      <div class="project-card reveal">
+        <p class="project-num">03 /</p>
+        <h3 class="project-name">Cow OS</h3>
+        <p class="project-desc">A small operating system that runs entirely in the browser. Built as an experiment in systems programming and web tech.</p>
+        <div class="project-tags">
+          <span class="project-tag">JavaScript</span>
+          <span class="project-tag">OS Dev</span>
+          <span class="project-tag">Browser</span>
+        </div>
+        <div class="project-links">
+          <a href="https://github.com/Mohamedboukerche22/cowos2" target="_blank" class="project-link">→ github</a>
+          <a href="https://mohamedboukerche22.github.io/cowos2/" target="_blank" class="project-link">→ try it</a>
+        </div>
+      </div>
+
+      <div class="project-card reveal">
+        <p class="project-num">04 /</p>
+        <h3 class="project-name">Lycée Website</h3>
+        <p class="project-desc">School management platform for Mohamed Boudiaf high school — tracks progress between students and teachers.</p>
+        <div class="project-tags">
+          <span class="project-tag">Web</span>
+          <span class="project-tag">PHP</span>
+          <span class="project-tag">MySQL</span>
+        </div>
+        <div class="project-links">
+          <a href="https://github.com/Mohamedboukerche22/mohamedboudiaf2" target="_blank" class="project-link">→ github</a>
+          <a href="https://mohamedboukerche22.github.io/mohamedboudiaf2/" target="_blank" class="project-link">→ demo</a>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+
+  <hr class="divider" />
+
+  <!-- COMPETITIVE PROGRAMMING -->
+  <section id="cp">
+    <p class="section-label reveal">// cat competitive_profiles.txt</p>
+    <h2 class="section-title reveal">Competitive Programming</h2>
+    <div class="cp-grid reveal">
+      <a href="https://codeforces.com/profile/mohamedboukerche55" target="_blank" class="cp-card">
+        <div class="cp-name">⚡ Codeforces</div>
+        <div class="cp-handle">mohamedboukerche55</div>
+      </a>
+      <a href="https://atcoder.jp/users/mohamedboukerche" target="_blank" class="cp-card">
+        <div class="cp-name">🏆 AtCoder</div>
+        <div class="cp-handle">mohamedboukerche</div>
+      </a>
+    </div>
+  </section>
+
+  <hr class="divider" />
+
+  <!-- CONTACT -->
+  <section id="contact">
+    <p class="section-label reveal">// ping me</p>
+    <h2 class="section-title reveal">Contact</h2>
+    <div class="contact-grid reveal">
+      <a href="mailto:mohamedboukerche55@gmail.com" class="contact-item">
+        <span class="contact-icon">✉</span>
+        <div><span class="contact-label">EMAIL</span><span class="contact-val">mohamedboukerche55@gmail.com</span></div>
+      </a>
+      <a href="https://github.com/Mohamedboukerche22" target="_blank" class="contact-item">
+        <span class="contact-icon">◈</span>
+        <div><span class="contact-label">GITHUB</span><span class="contact-val">Mohamedboukerche22</span></div>
+      </a>
+      <a href="https://www.instagram.com/mb_ghost_22/" target="_blank" class="contact-item">
+        <span class="contact-icon">◉</span>
+        <div><span class="contact-label">INSTAGRAM</span><span class="contact-val">mb_ghost_22</span></div>
+      </a>
+      <a href="https://discord.com/users/1118946243071193108" target="_blank" class="contact-item">
+        <span class="contact-icon">◈</span>
+        <div><span class="contact-label">DISCORD</span><span class="contact-val">1118946243071193108</span></div>
+      </a>
+      <a href="https://www.facebook.com/mohamed.boukerche.399" target="_blank" class="contact-item">
+        <span class="contact-icon">◉</span>
+        <div><span class="contact-label">FACEBOOK</span><span class="contact-val">mohamed.boukerche.399</span></div>
+      </a>
+      <a href="https://mohamedboukerche22.github.io/support/" target="_blank" class="contact-item">
+        <span class="contact-icon">💖</span>
+        <div><span class="contact-label">SUPPORT</span><span class="contact-val">Buy me a coffee</span></div>
+      </a>
+    </div>
+  </section>
+
+</main>
+
+<!-- FOOTER -->
+<footer>
+  <p class="footer-copy">© 2025 <span>Mohamed Boukerche</span> — Made with ❤️ in Algeria</p>
+  <div class="social-row">
+    <a href="https://github.com/Mohamedboukerche22" target="_blank">github</a>
+    <a href="https://www.instagram.com/mb_ghost_22/" target="_blank">instagram</a>
+    <a href="https://www.facebook.com/mohamed.boukerche.399" target="_blank">facebook</a>
+  </div>
+</footer>
+
+<script>
+  /* ── MATRIX RAIN ── */
+  const canvas = document.getElementById('matrix-bg');
+  const ctx = canvas.getContext('2d');
+  let W, H, cols, drops;
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789@#$%^&*(){}[]<>/\\|~';
+
+  function initMatrix() {
+    W = canvas.width = window.innerWidth;
+    H = canvas.height = window.innerHeight;
+    cols = Math.floor(W / 18);
+    drops = Array(cols).fill(1);
+  }
+
+  function drawMatrix() {
+    ctx.fillStyle = 'rgba(10,10,10,0.05)';
+    ctx.fillRect(0, 0, W, H);
+    ctx.fillStyle = '#00ff41';
+    ctx.font = '13px Fira Code, monospace';
+    for (let i = 0; i < cols; i++) {
+      const char = chars[Math.floor(Math.random() * chars.length)];
+      ctx.fillText(char, i * 18, drops[i] * 18);
+      if (drops[i] * 18 > H && Math.random() > 0.975) drops[i] = 0;
+      drops[i]++;
+    }
+  }
+
+  initMatrix();
+  window.addEventListener('resize', initMatrix);
+  setInterval(drawMatrix, 50);
+
+  /* ── TYPING EFFECT ── */
+  const phrases = [
+    'Competitive Programmer',
+    'Linux Enthusiast',
+    'Web Developer',
+    'C++ Developer',
+    'Open Source Contributor',
+    'Always Learning...',
+  ];
+  let pi = 0, ci = 0, deleting = false;
+  const el = document.getElementById('typing');
+
+  function type() {
+    const phrase = phrases[pi];
+    if (!deleting) {
+      el.textContent = phrase.slice(0, ++ci);
+      if (ci === phrase.length) { deleting = true; setTimeout(type, 1600); return; }
+    } else {
+      el.textContent = phrase.slice(0, --ci);
+      if (ci === 0) { deleting = false; pi = (pi + 1) % phrases.length; }
+    }
+    setTimeout(type, deleting ? 40 : 75);
+  }
+  type();
+
+  /* ── SCROLL REVEAL ── */
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+  }, { threshold: 0.12 });
+  document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+
+</script>
+</body>
+</html>
